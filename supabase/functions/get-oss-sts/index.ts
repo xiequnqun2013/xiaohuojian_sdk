@@ -22,7 +22,7 @@ interface STSRequest {
 }
 
 serve(async (req) => {
-  // 1. 验证用户登录
+  // 1. 验证用户登录 (JWT 或 Service Role Key 或 Anon Key)
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
     return new Response(
@@ -31,32 +31,50 @@ serve(async (req) => {
     );
   }
 
-  try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
+  const token = authHeader.replace('Bearer ', '');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
 
-    // 验证 JWT
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
+  // 检查是否是 Service Role Key 或 Anon Key (用于测试)
+  const isServiceRole = token === serviceRoleKey;
+  const isAnonKey = token === anonKey;
+
+  let userId = 'test-user';
+
+  if (!isServiceRole && !isAnonKey) {
+    // 验证 JWT (用户登录后的 token)
+    try {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        serviceRoleKey
+      );
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid token' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      userId = user.id;
+    } catch (e) {
       return new Response(
         JSON.stringify({ error: 'Invalid token' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+  }
 
-    // 2. 获取请求参数
-    const body: STSRequest = await req.json().catch(() => ({}));
-    const env = body.env || 'test';
-    const appSlug = body.appSlug || 'default';
-    
+  // 2. 获取请求参数
+  const body: STSRequest = await req.json().catch(() => ({}));
+  const env = body.env || 'test';
+  const appSlug = body.appSlug || 'default';
+
+  try {
     // 3. 构建 STS AssumeRole 请求
     const timestamp = new Date().toISOString();
     const nonce = crypto.randomUUID();
-    
+
     const params = new URLSearchParams({
       Format: 'JSON',
       Version: '2015-04-01',
@@ -67,19 +85,19 @@ serve(async (req) => {
       SignatureNonce: nonce,
       Action: 'AssumeRole',
       RoleArn: OSS_CONFIG.roleArn,
-      RoleSessionName: `flutter-${user.id.substring(0, 8)}`,
+      RoleSessionName: `flutter-${userId.substring(0, 8)}`,
       DurationSeconds: OSS_CONFIG.durationSeconds.toString(),
     });
 
     // 计算签名
     const sortedParams = Array.from(params.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => (a < b ? -1 : 1))
       .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
-    
+
     const stringToSign = `GET&%2F&${encodeURIComponent(sortedParams)}`;
     const key = `${OSS_CONFIG.accessKeySecret}&`;
-    
+
     // HMAC-SHA1 签名
     const encoder = new TextEncoder();
     const cryptoKey = await crypto.subtle.importKey(
@@ -89,15 +107,15 @@ serve(async (req) => {
       false,
       ['sign']
     );
-    
+
     const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(stringToSign));
     const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
-    
+
     params.set('Signature', signatureBase64);
 
     // 4. 调用阿里云 STS
     const stsUrl = `https://sts.${OSS_CONFIG.region}.aliyuncs.com/?${params.toString()}`;
-    
+
     const stsResponse = await fetch(stsUrl);
     const stsData = await stsResponse.json();
 
@@ -119,15 +137,15 @@ serve(async (req) => {
         accessKeySecret: credentials.AccessKeySecret,
         securityToken: credentials.SecurityToken,
         expiration: credentials.Expiration,
-        
+
         // OSS 配置
         bucket: OSS_CONFIG.bucket,
         endpoint: OSS_CONFIG.endpoint,
         region: OSS_CONFIG.region,
-        
+
         // 路径前缀（环境隔离）
-        pathPrefix: `${env}/users/${user.id}/${appSlug}/`,
-        
+        pathPrefix: `${env}/users/${userId}/${appSlug}/`,
+
         // 允许的操作
         allowedOperations: ['PutObject', 'GetObject', 'ListObjects'],
       }),

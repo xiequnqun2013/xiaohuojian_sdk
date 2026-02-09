@@ -20,16 +20,16 @@ api_url = "http://rocketapi.lensflow.cn"
 
 [inbucket]
 enabled = true
-port = 54324
+# port = 54324
 
 [storage]
 enabled = true
-port = 54325
+# port = 54325
 file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-port = 54326
+# port = 54326
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600
@@ -38,12 +38,12 @@ refresh_token_reuse_interval = 10
 
 [realtime]
 enabled = true
-port = 54327
+# port = 54327
 
 [analytics]
 enabled = true
-port = 54328
-vector_port = 54329
+# port = 54328
+# vector_port = 54329
 
 # 远程项目配置
 [remotes.ali]

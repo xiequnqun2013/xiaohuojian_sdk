@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth_config.dart';
 import 'models/user_profile.dart';
+import 'services/oss_service.dart';
+import 'services/cloud_sync_service.dart';
 
 /// 认证结果
 class AuthResult<T> {
@@ -27,7 +31,12 @@ class RocketWorkshopAuth {
 
   /// 初始化 SDK
   Future<void> initialize(AuthConfig config) async {
-    if (_initialized) return;
+    if (_initialized) {
+      if (kDebugMode) {
+        debugPrint('RocketWorkshopAuth already initialized, skipping');
+      }
+      return;
+    }
 
     _config = config;
 
@@ -89,11 +98,88 @@ class RocketWorkshopAuth {
       // 记录用户关联到当前 App
       await _associateUserWithApp(response.user!.id);
 
+      // 更新 OSS Service 的 JWT
+      final jwt = response.session?.accessToken;
+      if (jwt != null) {
+        ossService.setJWT(jwt);
+        cloudSync.updateJWT(jwt);
+      }
+
       return AuthResult.success(response.user!);
     } on AuthException catch (e) {
       return AuthResult.failure(e.message);
     } catch (e) {
       return AuthResult.failure('验证失败: $e');
+    }
+  }
+
+  /// 匿名登录 (仅测试用)
+  Future<AuthResult<User>> signInAnonymously() async {
+    try {
+      final response = await _client.auth.signInAnonymously();
+      
+      if (response.user == null) {
+        return AuthResult.failure('登录失败');
+      }
+
+      // 更新 JWT
+      final jwt = response.session?.accessToken;
+      if (jwt != null) {
+        ossService.setJWT(jwt);
+        // cloudSync.updateJWT is handled by onAuthStateChange listener
+      }
+
+      return AuthResult.success(response.user!);
+    } on AuthException catch (e) {
+      return AuthResult.failure(e.message);
+    } catch (e) {
+      return AuthResult.failure('匿名登录失败: $e');
+    }
+  }
+
+  /// 调试登录 (仅测试用)
+  /// 
+  /// 绕过短信验证，直接使用手机号登录
+  Future<AuthResult<User>> signInWithDebugPhone(String phone) async {
+    try {
+      // 调用 Edge Function
+      final response = await http.post(
+        Uri.parse('${_config.url}/functions/v1/debug-login'),
+        headers: {
+          'Authorization': 'Bearer ${_config.anonKey}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'phone': phone}),
+      );
+
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body)['error'] ?? '调试登录失败';
+        return AuthResult.failure(error);
+      }
+
+      final data = jsonDecode(response.body);
+      final session = data['session'];
+      
+      if (session == null || session['refresh_token'] == null) {
+        return AuthResult.failure('未返回有效会话');
+      }
+
+      // 设置 Supabase 会话
+      final authResponse = await _client.auth.setSession(session['refresh_token']);
+      
+      if (authResponse.user == null) {
+        return AuthResult.failure('设置会话失败');
+      }
+
+      // 更新 JWT (onAuthStateChange 会自动处理，但为了保险起见也可以手动设置)
+      // onAuthStateChange handles it.
+
+      return AuthResult.success(authResponse.user!);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('调试登录异常: $e');
+      }
+      return AuthResult.failure('调试登录异常: $e');
     }
   }
 
@@ -106,7 +192,19 @@ class RocketWorkshopAuth {
   bool get isLoggedIn => currentUser != null;
 
   /// 监听登录状态变化
-  Stream<AuthState> get onAuthStateChange => _client.auth.onAuthStateChange;
+  Stream<AuthState> get onAuthStateChange {
+    return _client.auth.onAuthStateChange.map((state) {
+      // 自动更新 JWT Token
+      final session = state.session;
+      if (session != null) {
+        ossService.setJWT(session.accessToken);
+        cloudSync.updateJWT(session.accessToken);
+      } else {
+        ossService.clear();
+      }
+      return state;
+    });
+  }
 
   /// 获取用户资料
   Future<AuthResult<UserProfile>> getProfile() async {
@@ -120,7 +218,11 @@ class RocketWorkshopAuth {
           .from('profiles')
           .select()
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        return AuthResult.failure('用户资料不存在');
+      }
 
       final profile = UserProfile.fromJson(response);
       return AuthResult.success(profile);
@@ -168,6 +270,8 @@ class RocketWorkshopAuth {
   Future<AuthResult<void>> signOut() async {
     try {
       await _client.auth.signOut();
+      // 清除 OSS Service 的 JWT
+      ossService.clear();
       return AuthResult.success(null);
     } on AuthException catch (e) {
       return AuthResult.failure(e.message);

@@ -92,6 +92,34 @@ class _LoginPageState extends State<LoginPage> {
     // 登录成功会自动触发 onAuthStateChange，页面自动跳转
   }
 
+  /// 测试账号登录 (Bypass)
+  Future<void> _loginAsTestUser() async {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      setState(() => _errorMessage = '请输入测试手机号');
+      return;
+    }
+    
+    debugPrint('Attempts to login with debug phone: $phone');
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // 尝试调试登录
+      final result = await authSDK.signInWithDebugPhone(phone);
+      if (!result.success) {
+        setState(() => _errorMessage = result.error);
+      }
+    } catch (e) {
+      setState(() => _errorMessage = '测试登录失败: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,9 +191,18 @@ class _LoginPageState extends State<LoginPage> {
                     : const Icon(Icons.send),
                 label: const Text('发送验证码'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
+
+             // 测试环境快捷登录
+            if (Environment.isTest && !_codeSent) ...[
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _isLoading ? null : _loginAsTestUser,
+                icon: const Icon(Icons.bug_report),
+                label: const Text('测试登录 (New)'),
+              ),
+            ],
 
             // 验证码输入
             if (_codeSent) ...[
