@@ -1,0 +1,50 @@
+# Supabase 配置文件
+# 适用于自托管/阿里云 Supabase
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://rocketapi.lensflow.cn"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+port = 54325
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+port = 54326
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+
+[realtime]
+enabled = true
+port = 54327
+
+[analytics]
+enabled = true
+port = 54328
+vector_port = 54329
+
+# 远程项目配置
+[remotes.ali]
+project_id = "ra-supabase-sb6xjntrfya75g"
