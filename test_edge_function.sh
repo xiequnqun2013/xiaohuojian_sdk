@@ -2,7 +2,7 @@
 
 # Edge Function 测试脚本
 
-SUPABASE_URL="http://8.161.114.102:80"
+SUPABASE_URL="http://rocketapi.lensflow.cn"
 ANON_KEY="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwNDQ0NjQ0LCJleHAiOjEzMjgxMDg0NjQ0fQ.b8jrVt73j4A3vlAN34TAntvPKy-9H3bMFdP37zux3pQ"
 
 echo "═══════════════════════════════════════════════════════════"

@@ -65,7 +65,7 @@ flutter run --dart-define=ENV=prod
 ### Supabase 配置（已内置）
 
 ```dart
-const supabaseUrl = 'http://8.161.114.102:80';
+const supabaseUrl = 'http://rocketapi.lensflow.cn';
 const supabaseAnonKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...';
 ```
 

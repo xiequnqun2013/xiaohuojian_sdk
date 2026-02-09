@@ -51,7 +51,7 @@ class OSSService {
   OSSService._internal();
 
   OSSConfig? _config;
-  final String _supabaseUrl = 'http://8.161.114.102:80';
+  final String _supabaseUrl = 'http://rocketapi.lensflow.cn';
   String? _jwtToken;
 
   /// 设置 JWT Token（登录后调用）

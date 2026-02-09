@@ -49,12 +49,12 @@ flutter run --dart-define=ENV=test
 
 ```bash
 # 1. 发送验证码
-curl -X POST "http://8.161.114.102:80/auth/v1/otp" \
+curl -X POST "http://rocketapi.lensflow.cn/auth/v1/otp" \
   -H "apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
   -d '{"phone":"+8618520160445"}'
 
 # 2. 收到验证码后立即验证（5秒内执行）
-curl -X POST "http://8.161.114.102:80/auth/v1/verify" \
+curl -X POST "http://rocketapi.lensflow.cn/auth/v1/verify" \
   -H "apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
   -d '{
     "phone": "+8618520160445",

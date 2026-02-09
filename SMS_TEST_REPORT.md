@@ -17,7 +17,7 @@
 
 **请求：**
 ```bash
-curl -X POST "http://8.161.114.102:80/auth/v1/otp" \
+curl -X POST "http://rocketapi.lensflow.cn/auth/v1/otp" \
   -H "apikey: eyJ0eXAiOiJKV1Qi..." \
   -H "Content-Type: application/json" \
   -d '{"phone":"+8618520160445"}'
@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 收到验证码后，使用以下请求验证：
 
 ```bash
-curl -X POST "http://8.161.114.102:80/auth/v1/verify" \
+curl -X POST "http://rocketapi.lensflow.cn/auth/v1/verify" \
   -H "apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwNDQ0NjQ0LCJleHAiOjEzMjgxMDg0NjQ0fQ.b8jrVt73j4A3vlAN34TAntvPKy-9H3bMFdP37zux3pQ" \
   -H "Content-Type: application/json" \
   -d '{

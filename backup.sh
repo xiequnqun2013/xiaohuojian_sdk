@@ -1,7 +1,7 @@
 #!/bin/bash
 # Supabase 数据库备份脚本
 
-SUPABASE_URL="http://8.161.114.102:80"
+SUPABASE_URL="http://rocketapi.lensflow.cn"
 SERVICE_KEY="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE3NzA0NDQ2NDQsImV4cCI6MTMyODEwODQ2NH0.quYlkZGW8wis-Ouc0sdhFiEx9qgD2UJqVVCCLSskFe0"
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="./backups"

@@ -109,7 +109,7 @@ authSDK.initialize(AuthConfig.staging(appId: 'jiakao-app'));
 
 | 环境 | URL | 用途 |
 |------|-----|------|
-| Staging | http://8.161.114.102:80 | 开发测试 |
+| Staging | http://rocketapi.lensflow.cn | 开发测试 |
 | Production | 你的生产地址 | 正式上线 |
 
 ## 错误处理

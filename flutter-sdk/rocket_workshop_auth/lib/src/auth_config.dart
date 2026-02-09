@@ -24,7 +24,7 @@ class AuthConfig {
     required String appId,
   }) {
     return AuthConfig(
-      url: 'http://8.161.114.102:80',
+      url: 'http://rocketapi.lensflow.cn',
       anonKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwNDQ0NjQ0LCJleHAiOjEzMjgxMDg0NjQ0fQ.b8jrVt73j4A3vlAN34TAntvPKy-9H3bMFdP37zux3pQ',
       appId: appId,
       debug: true,
