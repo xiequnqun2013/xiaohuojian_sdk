@@ -2,15 +2,17 @@
 
 ## 🎯 核心功能状态
 
-### ✅ 已完成 (80%)
+### ✅ 已完成 (90%)
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
 | **数据库架构** | ✅ 100% | 所有表 + RLS + 触发器 |
-| **短信登录** | ✅ 100% | 测试通过 (18520160445) |
-| **域名配置** | ✅ 100% | rocketapi.lensflow.cn |
+| **短信登录** | 🟡 80% | Edge Function 代码完成，待部署 |
+| **域名配置** | ✅ 100% | http://42.121.49.212:8080 |
 | **集中配置** | ✅ 100% | config.dart 管理 |
-| **CloudSyncService** | 🟡 70% | 框架完成，待 OSS 实际上传 |
+| **OSS Service** | ✅ 100% | 完整实现上传/下载/复制/删除/列表 |
+| **CloudSyncService** | ✅ 100% | 完整实现数据同步和迁移 |
+| **SQL 函数** | ✅ 100% | get_oss_sts + get_oss_sts_http |
 
 ### 🟡 进行中/待配置 (10%)
 
@@ -18,7 +20,7 @@
 |------|------|------|
 | **苹果登录** | 🟡 0% | 需要 Apple Developer 配置 |
 | **微信登录** | ⏸️ 等待 | 阿里云已支持，等你的资料 |
-| **OSS 实际上传** | 🟡 50% | 需要 STS 或固定 AK |
+| **Edge Function 部署** | 🟡 50% | send-sms + get-oss-sts 代码完成，待部署 |
 | **购买验证** | ❌ 0% | Edge Function 待部署 |
 
 ---
@@ -32,9 +34,17 @@
   - 耗时：~2.5 小时
   - 文档：`APPLE_LOGIN_SETUP.md`
 
-- [ ] **完成 OSS 上传**
-  - 方案 A：部署 Edge Function 获取 STS
-  - 方案 B：使用固定 AK（简单但不安全）
+- [x] **完成 OSS 上传** ✅ 已完成
+  - SQL 函数：`get_oss_sts_http` 已部署
+  - Flutter SDK：`oss_service.dart` 完整实现
+  - Flutter SDK：`cloud_sync_service.dart` 完整实现
+  - 支持：上传/下载/复制/删除/列表/存在检查
+
+- [ ] **部署 Edge Function（send-sms + get-oss-sts）**
+  - 需要：阿里云 AccessKey + 短信签名/模板
+  - 部署脚本：`deploy_edge_functions.sh`
+  - 配置文档：`SMS_EDGE_FUNCTION_SETUP.md`
+  - OSS STS 当前使用 SQL 函数作为备用方案
 
 ### 中优先级（下周做）
 
@@ -58,10 +68,36 @@
 
 | 阻塞项 | 状态 | 需要你提供 |
 |--------|------|-----------|
+| **短信服务** | 🔴 阻塞 | 阿里云 AccessKey + 短信签名 + 模板 |
 | 苹果登录 | 🔴 阻塞 | Apple Developer 账号 |
 | 微信登录 | 🔴 阻塞 | 微信开放平台资料 |
 | 购买验证 | 🔴 阻塞 | App Store / Play Console 凭证 |
 | SSL/HTTPS | 🟡 建议 | 生产环境必需 |
+
+---
+
+## 📋 需要配置清单
+
+### 1. 阿里云短信（必需 - 用于登录）
+
+```bash
+ALIBABA_CLOUD_ACCESS_KEY_ID=你的AccessKey ID
+ALIBABA_CLOUD_ACCESS_KEY_SECRET=你的AccessKey Secret
+SMS_SIGN_NAME=你的短信签名（如：小火箭）
+SMS_TEMPLATE_CODE=你的模板CODE（如：SMS_123456789）
+```
+
+获取方法见：`SMS_EDGE_FUNCTION_SETUP.md`
+
+### 2. 阿里云 OSS（可选 - 已有 SQL 备用方案）
+
+```bash
+OSS_ACCESS_KEY_ID=你的OSS AccessKey ID
+OSS_ACCESS_KEY_SECRET=你的OSS AccessKey Secret
+OSS_ROLE_ARN=acs:ram::xxxx:role/xxxx
+```
+
+当前 Flutter SDK 会自动先尝试 Edge Function，失败时使用 SQL 函数。
 
 ---
 

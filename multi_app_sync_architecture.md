@@ -108,6 +108,20 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+## 2.5 账号与鉴权体系 (Identity & Auth)
+
+本系统支持多种登录方式，统一映射到 Supabase `auth.users` 表。
+
+### 2.5.1 支持的登录方式
+1.  **手机号 + 验证码**：(已实现) 使用 Supabase Mobile Auth。
+2.  **苹果登录 (Sign in with Apple)**：(P0) iOS 必需。使用 Supabase Native Apple Login。
+3.  **微信登录**：(P1) 使用自定义 Edge Function `auth-wechat` 交换 OpenID，生成 Custom JWT 或关联现有账号。
+
+### 2.5.2 账号关联逻辑
+- 原则：**以手机号为核心**。
+- 微信/苹果登录后，建议引导绑定手机号，以实现夸平台（iOS <-> Android）和跨账号体系的数据互通。
+- `auth.identities` 表由 Supabase 自动管理多重身份绑定。
+
 ---
 
 ## 3. 核心流程
