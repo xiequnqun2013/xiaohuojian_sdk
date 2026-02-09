@@ -1,0 +1,43 @@
+name: example_app
+description: 小火箭 SDK 示例应用
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # 本地 SDK 依赖
+  rocket_workshop_auth:
+    path: ../rocket_workshop_auth
+  
+  # Supabase
+  supabase_flutter: ^2.0.0
+  
+  # 状态管理
+  flutter_riverpod: ^2.4.0
+  
+  # 本地存储
+  shared_preferences: ^2.2.0
+  
+  # 设备信息
+  device_info_plus: ^9.0.0
+  
+  # OSS
+  aliyun_oss: ^1.0.0
+  
+  # 路径
+  path_provider: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
