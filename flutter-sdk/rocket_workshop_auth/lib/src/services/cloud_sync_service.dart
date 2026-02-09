@@ -95,10 +95,10 @@ class CloudSyncService {
     return '${_config.env}/users/$userId/${_config.appSlug}/$filename';
   }
 
-  /// 获取 OSS 配置（使用 SQL 函数）
+  /// 获取 OSS 配置（使用 SQL 函数替代 Edge Function）
   Future<Map<String, dynamic>> getOSSConfig() async {
     final response = await Supabase.instance.client
-        .rpc('get_oss_sts', params: {
+        .rpc('get_oss_sts_http', params: {
           'env': _config.env,
           'app_slug': _config.appSlug,
         });
