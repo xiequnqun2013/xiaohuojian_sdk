@@ -6,17 +6,17 @@ class RocketConfig {
   
   /// Supabase URL
   /// 
-  /// 开发环境: http://rocketapi.lensflow.cn
+  /// 开发环境: http://42.121.49.212:8080 (PolarDB Supabase)
   /// 生产环境: https://your-production-domain.com
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'http://rocketapi.lensflow.cn',
+    defaultValue: 'http://42.121.49.212:8080',
   );
   
   /// Supabase Anon Key (Public)
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwNDQ0NjQ0LCJleHAiOjEzMjgxMDg0NjQ0fQ.b8jrVt73j4A3vlAN34TAntvPKy-9H3bMFdP37zux3pQ',
+    defaultValue: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InBvbGFyZGIiLCJpYXQiOjE3NzA0NDM3NzUsImV4cCI6MjA4NTgwMzc3NX0.teo9qJln_lsF_JMJd2I3oH2IK9FY9rp5uvPnkfatjso',
   );
   
   // ==================== OSS 配置 ====================
