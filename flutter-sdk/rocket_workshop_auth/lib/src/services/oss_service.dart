@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../config.dart';
 
 /// OSS 配置
 class OSSConfig {
@@ -51,7 +52,7 @@ class OSSService {
   OSSService._internal();
 
   OSSConfig? _config;
-  final String _supabaseUrl = 'http://rocketapi.lensflow.cn';
+  final String _supabaseUrl = RocketConfig.supabaseUrl;
   String? _jwtToken;
 
   /// 设置 JWT Token（登录后调用）

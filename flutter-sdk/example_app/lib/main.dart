@@ -10,6 +10,8 @@ import 'pages/sync_demo_page.dart';
 /// 
 /// 测试环境: flutter run --dart-define=ENV=test
 /// 线上环境: flutter run --dart-define=ENV=prod
+/// 
+/// 全局配置在: rocket_workshop_auth/lib/src/config.dart
 class Environment {
   static const String env = String.fromEnvironment('ENV', defaultValue: 'test');
   static bool get isTest => env == 'test';
@@ -22,14 +24,9 @@ class Environment {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 初始化 SDK
+  // 初始化 SDK（配置从 config.dart 读取，无需硬编码）
   await RocketWorkshopAuth().initialize(
-    AuthConfig(
-      url: 'http://rocketapi.lensflow.cn',
-      anonKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwNDQ0NjQ0LCJleHAiOjEzMjgxMDg0NjQ0fQ.b8jrVt73j4A3vlAN34TAntvPKy-9H3bMFdP37zux3pQ',
-      appId: 'shenlun', // 或从配置读取
-      debug: true,
-    ),
+    AuthConfig.staging(appId: 'shenlun'),
   );
   
   runApp(
