@@ -32,3 +32,12 @@ __pycache__/
 
 # OS files
 Thumbs.db
+
+# Security - Files that may contain credentials
+EDGE_FUNCTION_TEST_REPORT.md
+OSS_SETUP_GUIDE.md
+deploy_edge_function.sh
+deploy_oss_full.sh
+setup_oss_for_flutter.py
+*.key
+*.pem
