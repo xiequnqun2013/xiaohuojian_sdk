@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+.mcp.json
+
+# Temporary files
+*.log
+*.tmp
+.tmp/
+.qoder/
+
+# Build outputs
+build/
+dist/
+*.pyc
+__pycache__/
+
+# OS files
+Thumbs.db

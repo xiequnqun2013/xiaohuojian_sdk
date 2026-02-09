@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase SMS 认证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3366cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2952a3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .hidden {
+            display: none;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background-color: #eee;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .tab.active {
+            background-color: #3366cc;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        #config-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        /* 用户信息表格样式 */
+        .user-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .user-info-table th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+        .user-info-table td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+        }
+        .user-info-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .user-info-table tr:hover {
+            background-color: #e9ecef;
+        }
+        .user-info-json {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supabase SMS 认证测试</h1>
+
+        <div id="loading" class="loading">
+            正在加载配置...
+        </div>
+
+        <div id="config-warning">
+            <strong>警告:</strong> 无法获取Supabase配置，请检查服务器环境变量设置！
+        </div>
+
+        <!-- 标签页 -->
+        <div id="tabs" class="tabs hidden">
+            <div class="tab active" onclick="switchTab('register')">注册</div>
+            <div class="tab" onclick="switchTab('login')">登录</div>
+            <div class="tab" onclick="switchTab('verify')">验证码</div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="register-tab" class="tab-content active hidden">
+            <div class="section">
+                <h2>SMS 注册</h2>
+                <div class="form-group">
+                    <label for="register-phone">手机号</label>
+                    <input type="tel" id="register-phone" placeholder="请输入手机号">
+                </div>
+                <button id="register-btn" onclick="signUpWithPhone()">发送验证码</button>
+
+                <div id="register-message" class="message hidden"></div>
+            </div>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="login-tab" class="tab-content hidden">
+            <div class="section">
+                <h2>SMS 登录</h2>
+                <div class="form-group">
+                    <label for="login-phone">手机号</label>
+                    <input type="tel" id="login-phone" placeholder="请输入手机号">
+                </div>
+                <button id="login-btn" onclick="signInWithPhone()">发送验证码</button>
+
+                <div id="login-message" class="message hidden"></div>
+            </div>
+        </div>
+
+        <!-- 验证码表单 -->
+        <div id="verify-tab" class="tab-content hidden">
+            <div class="section">
+                <h2>验证验证码</h2>
+                <div class="form-group">
+                    <label for="phone-number">手机号</label>
+                    <input type="tel" id="phone-number" placeholder="请输入手机号">
+                </div>
+                <div class="form-group">
+                    <label for="verification-code">验证码</label>
+                    <input type="text" id="verification-code" placeholder="请输入收到的验证码">
+                </div>
+                <button id="verify-btn" onclick="verifyOTP()">验证</button>
+
+                <div id="verify-message" class="message hidden"></div>
+            </div>
+
+            <div class="section">
+                <h2>用户信息</h2>
+                <button onclick="getUserInfo()">获取用户信息</button>
+                <button onclick="signOut()">退出登录</button>
+
+                <div id="user-info" class="message hidden"></div>
+
+                <!-- 详细用户信息表格 -->
+                <div id="user-info-detail" class="hidden">
+                    <h3>详细信息</h3>
+                    <table class="user-info-table">
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>值</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-info-table-body">
+                            <!-- 动态填充用户信息 -->
+                        </tbody>
+                    </table>
+
+                    <h3>原始数据</h3>
+                    <div id="user-info-json" class="user-info-json"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量存储Supabase配置
+        window.SUPABASE_CONFIG = null;
+
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    window.SUPABASE_CONFIG = config;
+
+                    // 隐藏加载状态，显示内容
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('tabs').classList.remove('hidden');
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('hidden');
+                    });
+
+                    // 初始化应用
+                    initializeApp();
+                } else {
+                    throw new Error('无法获取配置');
+                }
+            } catch (error) {
+                console.error('获取配置失败:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('config-warning').style.display = 'block';
+            }
+        });
+
+        // 初始化应用
+        function initializeApp() {
+            // 这里可以添加其他初始化逻辑
+            console.log('应用初始化完成，Supabase配置:', window.SUPABASE_CONFIG);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
